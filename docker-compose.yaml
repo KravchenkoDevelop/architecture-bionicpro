@@ -40,3 +40,77 @@ services:
       REACT_APP_KEYCLOAK_URL: http://localhost:8080
       REACT_APP_KEYCLOAK_REALM: reports-realm
       REACT_APP_KEYCLOAK_CLIENT_ID: reports-frontend
+
+  # ---------------------------------------------------------------------------
+  # Reports OLAP Database (PostgreSQL)
+  # Хранит: crm_clients, telemetry_events, user_reports_mart (витрина)
+  # ---------------------------------------------------------------------------
+  reports_postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: reports_db
+      POSTGRES_USER: reports_user
+      POSTGRES_PASSWORD: reports_password
+    volumes:
+      - ./postgres-reports-data:/var/lib/postgresql/data
+      - ./reports-service/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5434:5432"
+
+  # ---------------------------------------------------------------------------
+  # Reports Service API (FastAPI)
+  # GET /reports — возвращает предрассчитанный отчёт из OLAP-витрины
+  # ---------------------------------------------------------------------------
+  reports_service:
+    build:
+      context: ./reports-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: reports-realm
+      DB_HOST: reports_postgres
+      DB_PORT: 5432
+      DB_NAME: reports_db
+      DB_USER: reports_user
+      DB_PASS: reports_password
+    depends_on:
+      - reports_postgres
+      - keycloak
+
+  # ---------------------------------------------------------------------------
+  # Apache Airflow (ETL оркестратор)
+  # Запускает DAG reports_etl по расписанию: ежедневно в 02:00 UTC
+  # UI доступен на http://localhost:8081 (admin / admin)
+  # ---------------------------------------------------------------------------
+  airflow:
+    image: apache/airflow:2.8.0
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://reports_user:reports_password@reports_postgres:5432/reports_db
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__WEBSERVER__SECRET_KEY: "bionic-pro-airflow-secret"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      # Соединение с OLAP БД для DAG (psycopg2 напрямую)
+      REPORTS_DB_HOST: reports_postgres
+      REPORTS_DB_PORT: "5432"
+      REPORTS_DB_NAME: reports_db
+      REPORTS_DB_USER: reports_user
+      REPORTS_DB_PASS: reports_password
+      # Создаём пользователя при первом запуске
+      _AIRFLOW_DB_MIGRATE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - airflow-logs:/opt/airflow/logs
+    ports:
+      - "8081:8080"
+    command: standalone
+    depends_on:
+      - reports_postgres
+
+volumes:
+  airflow-logs:
