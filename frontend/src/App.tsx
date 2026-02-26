@@ -1,19 +1,28 @@
 import React from 'react';
 import { ReactKeycloakProvider } from '@react-keycloak/web';
-import Keycloak, { KeycloakConfig } from 'keycloak-js';
+import Keycloak, { KeycloakConfig, KeycloakInitOptions } from 'keycloak-js';
 import ReportPage from './components/ReportPage';
 
 const keycloakConfig: KeycloakConfig = {
   url: process.env.REACT_APP_KEYCLOAK_URL,
-  realm: process.env.REACT_APP_KEYCLOAK_REALM||"",
-  clientId: process.env.REACT_APP_KEYCLOAK_CLIENT_ID||""
+  realm: process.env.REACT_APP_KEYCLOAK_REALM || '',
+  clientId: process.env.REACT_APP_KEYCLOAK_CLIENT_ID || '',
 };
 
 const keycloak = new Keycloak(keycloakConfig);
 
+// PKCE (Proof Key for Code Exchange) — защита от перехвата authorization code.
+// code_verifier генерируется keycloak-js в браузере; на сервер Keycloak передаётся
+// только его SHA-256 хеш (code_challenge). Без code_verifier украденный code бесполезен.
+const keycloakInitOptions: KeycloakInitOptions = {
+  onLoad: 'check-sso',
+  silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+  pkceCodeChallengeMethod: 'S256',
+};
+
 const App: React.FC = () => {
   return (
-    <ReactKeycloakProvider authClient={keycloak}>
+    <ReactKeycloakProvider authClient={keycloak} initOptions={keycloakInitOptions}>
       <div className="App">
         <ReportPage />
       </div>
