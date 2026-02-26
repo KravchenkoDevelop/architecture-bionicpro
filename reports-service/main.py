@@ -78,11 +78,11 @@ async def _fetch_jwks() -> dict:
     return _jwks_cache
 
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Security(security),
+    credentials: Optional[HTTPAuthorizationCredentials] = Security(security),
 ) -> str:
     """
     Валидирует JWT-токен и возвращает идентификатор пользователя.
@@ -95,6 +95,12 @@ async def get_current_user(
     по токену; запросить чужой отчёт невозможно, т.к. user_id не принимается
     как параметр запроса.
     """
+    if credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authorization header with Bearer token is required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     token = credentials.credentials
     try:
         jwks = await _fetch_jwks()
