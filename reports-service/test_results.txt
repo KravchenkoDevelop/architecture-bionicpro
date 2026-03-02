@@ -1,0 +1,40 @@
+========================================================================
+BionicPRO Reports Service — Automated Test Results
+Run at : 2026-03-02 22:04:55
+Suite  : reports-service/tests/
+========================================================================
+
+Tested requirements:
+  [1] UI can call GET /reports to fetch the report
+  [2] Unauthenticated requests are rejected (HTTP 401)
+  [3] Users can only access their own report (user_id from JWT)
+  [4] Service reads from OLAP DB — no real-time aggregation
+  [5] 404 returned when Airflow has not yet processed the period
+
+Results:
+------------------------------------------------------------------------
+  ✓ PASS  [0.002s]  test_no_auth_header_returns_401
+  ✗ FAIL  [2.870s]  test_malformed_bearer_token_returns_401
+            @contextlib.contextmanager
+                def map_httpcore_exceptions() -> typing.Iterator[None]:
+                    global HTTPCORE_EXC_MAP
+                    if len(HTTPCORE_EXC_MAP) == 0:
+                        HTTPCORE_EXC_MAP = _load_httpcore_exceptions()
+                    try:
+            >           yield
+            
+  ✓ PASS  [0.001s]  test_missing_bearer_prefix_returns_401
+  ✓ PASS  [0.003s]  test_authenticated_user_gets_report
+  ✓ PASS  [0.001s]  test_health_endpoint_is_accessible
+  ✓ PASS  [0.002s]  test_user_id_comes_from_token_not_from_query_param
+  ✓ PASS  [0.002s]  test_db_query_uses_user_id_from_token
+  ✓ PASS  [0.003s]  test_report_is_read_from_olap_without_aggregation
+  ✓ PASS  [0.002s]  test_report_stats_values_match_olap_row
+  ✓ PASS  [0.002s]  test_no_data_in_olap_returns_404
+  ✓ PASS  [0.002s]  test_future_date_with_no_data_returns_404
+  ✓ PASS  [0.002s]  test_specific_processed_date_returns_200
+
+========================================================================
+  Total: 12  |  Passed: 11  |  Failed: 1
+  Verdict: 1 TEST(S) FAILED ✗
+========================================================================

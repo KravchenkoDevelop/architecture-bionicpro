@@ -14,10 +14,10 @@ const keycloak = new Keycloak(keycloakConfig);
 // PKCE (Proof Key for Code Exchange) — защита от перехвата authorization code.
 // code_verifier генерируется keycloak-js в браузере; на сервер Keycloak передаётся
 // только его SHA-256 хеш (code_challenge). Без code_verifier украденный code бесполезен.
+// Начиная с keycloak-js v19, PKCE S256 включён по умолчанию — явно указывать не нужно.
 const keycloakInitOptions: KeycloakInitOptions = {
   onLoad: 'check-sso',
   silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
-  pkceCodeChallengeMethod: 'S256',
 };
 
 const App: React.FC = () => {

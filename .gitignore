@@ -1,2 +1,21 @@
+# Databases / volumes
 /postgres-keycloak-data
+/postgres-reports-data
+
+# Node dependencies
+node_modules/
+package-lock.json
+yarn.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+/frontend/build
+/backend/dist
+
+# IDE / OS
 2024__yandex-architecture-sso.code-workspace
+.DS_Store
+.env.local
+.env.*.local
