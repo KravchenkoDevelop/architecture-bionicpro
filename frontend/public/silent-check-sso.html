@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+  <body>
+    <script>
+      // Этот файл используется keycloak-js для фоновой проверки SSO-сессии
+      // (onLoad: 'check-sso', silentCheckSsoRedirectUri).
+      // Keycloak открывает эту страницу в скрытом iframe; она передаёт текущий URL
+      // родительскому окну, не раскрывая токены в основном контексте браузера.
+      parent.postMessage(location.href, location.origin);
+    </script>
+  </body>
+</html>

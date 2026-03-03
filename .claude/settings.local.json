@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"$VSNODE_DIR/npm.cmd\" install)"
+    ]
+  }
+}

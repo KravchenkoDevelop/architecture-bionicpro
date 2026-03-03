@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"$UVEXE\" run --with pytest --with pytest-asyncio --with httpx python -m pytest -v)"
+    ]
+  }
+}
