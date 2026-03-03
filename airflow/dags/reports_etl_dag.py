@@ -106,6 +106,10 @@ CREATE TABLE IF NOT EXISTS user_reports_mart (
 
 CREATE INDEX IF NOT EXISTS idx_mart_keycloak_id
     ON user_reports_mart (keycloak_id);
+
+-- Добавляем колонку если таблица была создана раньше без неё
+ALTER TABLE stg_crm_clients
+    ADD COLUMN IF NOT EXISTS prosthesis_serial VARCHAR(255);
 """
 
 

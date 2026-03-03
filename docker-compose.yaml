@@ -100,17 +100,7 @@ services:
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - airflow-logs:/opt/airflow/logs
-    command: >
-      bash -c "
-        airflow db migrate &&
-        airflow users create
-          --username admin
-          --password admin
-          --firstname Admin
-          --lastname User
-          --role Admin
-          --email admin@example.com
-      "
+    command: bash -c "airflow db migrate && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com"
     restart: on-failure
     depends_on:
       - reports_postgres
